@@ -30,7 +30,7 @@ function HeaderSideNav(props)
                     </ul>
                 </div>
             
-                <div className="">
+                <div className="bg-[#F0F0F0] w-screen">
                     {props.children}
                 </div>
             </div>
