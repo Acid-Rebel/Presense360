@@ -43,3 +43,32 @@
     font-size: 20px;
     display: flex;
 } */
+
+
+ul.navBar
+{
+    @apply 
+    w-full
+}
+
+ul.navBar > li
+{
+  @apply 
+  flex  
+  cursor-pointer 
+  border-b-3 
+border-b-[#111763] 
+  w-full h-[55px] 
+  items-center text-[15px]
+text-white 
+hover:bg-[#111763]
+}
+
+ul.navBar > li>img 
+{
+  @apply 
+  ml-[5px]
+  mr-[5px]
+}
+
+
