@@ -2,6 +2,7 @@ import {useState,useEffect,useMemo} from 'react';
 import HeaderSideNav from "./Components/Header/HeaderSideNav.jsx"
 import ProgressCircle from "./Components/ProgressCircle/ProgressCircle.jsx"
 import DonutChart from './Components/DonutChart/DonutChart.jsx';
+import PresentBar from './Components/PresentBar/PresentBar.jsx';
 
 function Dashboard() {
     
@@ -10,7 +11,7 @@ function Dashboard() {
     const present=75;
     const late=5;
     const onLeave=6;
-    
+
   const [currDate,setDate]=useState(new Date());
   const [chartData, setChartData] = useState(null);
   const [chartOptions, setChartOptions] = useState(null);
@@ -36,14 +37,19 @@ function Dashboard() {
   return (
     <>
       <HeaderSideNav>
-        <div className='ml-[15px]'>
-          <h1 className='mt-[30px] text-[32px]'>Theekimootiyl Insurance Copporation </h1>
-          <h1 className='text-[24px]'>{getDayFormat(currDate.getDay())}, {currDate.getDate()}/{currDate.getMonth()}/{currDate.getFullYear()}</h1>
-          <div className='flex justify-between w-[775px]'>
-            <ProgressCircle data={{'present':present,'total':total, 'late':late}}/>
+        <div className='flex'>
+          <div className='ml-[15px] flex-l'>
+            <h1 className='mt-[30px] text-[32px]'>Theekimootiyl Insurance Copporation </h1>
+            <h1 className='text-[24px]'>{getDayFormat(currDate.getDay())}, {currDate.getDate()}/{currDate.getMonth()}/{currDate.getFullYear()}</h1>
+            <div className='flex justify-between w-[775px]'>
+              <ProgressCircle data={{'present':present,'total':total, 'late':late}}/>
+            </div>
+            <div>
+              <DonutChart/>
+            </div>
           </div>
-          <div>
-            <DonutChart/>
+          <div className='w-full ml-5 mt-[115px] mb-[10px] mr-5'>
+            <PresentBar/>
           </div>
         </div>
       </HeaderSideNav>
