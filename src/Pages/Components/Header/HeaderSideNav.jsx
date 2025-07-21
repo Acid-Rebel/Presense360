@@ -19,7 +19,7 @@ function HeaderSideNav(props)
                     </div>
             </header>
 
-            <div className='flex'>
+            <div className='flex '>
                 <div className="flex bg-[#4F6C93] h-[calc(100vh-66px)] w-[242px]">
                     <ul className='navBar'>
                         <li><img src={dashboardImage} height={27} width={27}/>Dashboard</li>
@@ -30,7 +30,7 @@ function HeaderSideNav(props)
                     </ul>
                 </div>
             
-                <div className="bg-[#F0F0F0] w-screen">
+                <div className="bg-[#F0F0F0] flex-1 overflow-auto">
                     {props.children}
                 </div>
             </div>

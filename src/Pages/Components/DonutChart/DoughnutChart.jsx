@@ -44,16 +44,18 @@ const DoughnutChart = ({ data, options, style }) => {
   }, [data, options]);
 
   return (
-    <div className="card flex justify-content-center">
-      <Chart
-        ref={chartRef}
-        type="doughnut"
-        data={data || defaultData}
-        options={options || defaultOptions}
-        style={style || { position: 'relative', width: '40%' }}
-      />
-    </div>
-  );
+    
+  
+    <Chart
+      ref={chartRef}
+      type="doughnut"
+      data={data || defaultData}
+      options={options || defaultOptions}
+      style={{ width: '100%', height: '100%' }}
+    />
+  
+);
+
 };
 
 export default DoughnutChart;
