@@ -7,7 +7,7 @@ function PresentBar()
         <div className='border-b-[#F0F0F0] border-b-3  bg-white'>
             <h1 className='ml-[5px]'>Present</h1>
         </div> 
-        <div className="overflow-y-auto  bg-white h-[409px] ">
+        <div className="overflow-y-auto  bg-white h-[700px] ">
                
             <ol>
                 <li className='border-b-3 border-b-[#F0F0F0] '>

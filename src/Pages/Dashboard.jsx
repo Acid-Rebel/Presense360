@@ -3,6 +3,7 @@ import HeaderSideNav from "./Components/Header/HeaderSideNav.jsx"
 import ProgressCircle from "./Components/ProgressCircle/ProgressCircle.jsx"
 import DonutChart from './Components/DonutChart/DonutChart.jsx';
 import PresentBar from './Components/PresentBar/PresentBar.jsx';
+import AbsentBar from './Components/AbsentBar/AbsentBar.jsx';
 
 function Dashboard() {
     
@@ -37,8 +38,8 @@ function Dashboard() {
   return (
     <>
       <HeaderSideNav>
-        <div className='flex'>
-          <div className='ml-[15px] flex-l'>
+        <div className='flex w-full h-full '>
+          <div className='flex flex-col w-[775px] ml-[15px] '>
             <h1 className='mt-[30px] text-[32px]'>Theekimootiyl Insurance Copporation </h1>
             <h1 className='text-[24px]'>{getDayFormat(currDate.getDay())}, {currDate.getDate()}/{currDate.getMonth()}/{currDate.getFullYear()}</h1>
             <div className='flex justify-between w-[775px]'>
@@ -47,8 +48,12 @@ function Dashboard() {
             <div>
               <DonutChart/>
             </div>
+            <div className=' flex justify-between h-[275px] mt-[15px]'>
+              <AbsentBar type={'Absent'}/>
+              <AbsentBar type={'Onleave'}/>
+            </div>
           </div>
-          <div className='w-full ml-5 mt-[115px] mb-[10px] mr-5'>
+          <div className=' flex-1  w-[775px] ml-[15px] mr-[15px] mb-[15px] mt-[115px]'>
             <PresentBar/>
           </div>
         </div>

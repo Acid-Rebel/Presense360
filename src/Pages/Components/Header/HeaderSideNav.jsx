@@ -20,7 +20,7 @@ function HeaderSideNav(props)
             </header>
 
             <div className='flex '>
-                <div className="flex bg-[#4F6C93] h-[calc(100vh-66px)] w-[242px]">
+                <div className="flex bg-[#4F6C93]  w-[242px]">
                     <ul className='navBar'>
                         <li><img src={dashboardImage} height={27} width={27}/>Dashboard</li>
                         <li><img src={reportImage} height={27} width={27}/>Attendance Reports</li>
