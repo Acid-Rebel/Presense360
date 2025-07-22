@@ -59,7 +59,9 @@ ul.navBar > li
   border-b-3 
 border-b-[#111763] 
   w-full h-[55px] 
-  items-center text-[15px]
+  items-center 
+  /* text-[15px] */
+  text-[1vw]
 text-white 
 hover:bg-[#111763]
 }
