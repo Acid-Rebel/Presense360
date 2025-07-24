@@ -38,27 +38,25 @@ function Dashboard() {
   return (
     <>
       
-        
-          <div className='flex flex-col w-[48.5rem] ml-[15px] '>
+        <div className='flex'>
+          <div className='flex flex-col w-[48.5rem] ml-[1rem] '>
             <h1 className='mt-[1.5rem] text-[32px]'>Theekimootiyl Insurance Copporation </h1>
             <h1 className='text-[24px]'>{getDayFormat(currDate.getDay())}, {currDate.getDate()}/{currDate.getMonth()}/{currDate.getFullYear()}</h1>
             <div className='flex justify-between w-full h-full'>
               <ProgressCircle data={{'present':present,'total':total, 'late':late}}/>
             </div>
-            {/* <div>
+            <div>
               <DonutChart/>
-            </div> */}
-            {/* <div className=' flex justify-between h-[275px] mt-[15px]'>
+            </div>
+            <div className=' flex justify-between h-[20rem] mt-[0.5rem] mb-[2.5rem]'>
               <AbsentBar type={'Absent'}/>
               <AbsentBar type={'Onleave'}/>
-            </div> */}
+            </div>
           </div>
-          {/* <div className=' flex-1  w-[775px] ml-[15px] mr-[15px] mb-[15px] mt-[115px]'>
+          <div className=' flex-1  w-[775px] ml-[15px] mr-[15px] mb-[15px] mt-[115px]'>
             <PresentBar/>
-          </div> */}
-
-     
-      
+          </div>
+      </div> 
     </>
   )
 }

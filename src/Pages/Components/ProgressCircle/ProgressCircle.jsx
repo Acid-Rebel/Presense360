@@ -12,7 +12,7 @@ function ProgressCircle(props)
                 <div className="ml-[0.5rem]">
                     <CircularProgressBar percentage={Math.trunc(present/total*100)} color={'green'}/>
                 </div>
-                <div className="ml-[10px] text-[20px]">
+                <div className="ml-[0.65rem] text-[1.2rem]">
                     <p>Present</p>
                     <p>{present}</p>
                 </div>
@@ -22,7 +22,7 @@ function ProgressCircle(props)
                 <div className="ml-[0.5rem]">
                     <CircularProgressBar percentage={Math.trunc(absent/total*100) } color={'red'} />
                 </div>
-                <div className="ml-[10px] text-[20px]">
+                <div className="ml-[0.65rem] text-[1.2rem]">
                     <p>Absent &<br/>On Leave</p>
                     <p>{absent}</p>
                 </div>
@@ -32,7 +32,7 @@ function ProgressCircle(props)
                 <div className="ml-[0.5rem]">
                     <CircularProgressBar percentage={Math.trunc((present-late)/present*100)} color={'green'}/>
                 </div>
-                <div className="ml-[10px] text-[20px]">
+                <div className="ml-[0.65rem] text-[1.2rem]">
                     <p>On Time</p>
                     <p>{present-late}</p>
                 </div>
@@ -42,7 +42,7 @@ function ProgressCircle(props)
                 <div className="ml-[0.5rem]">
                     <CircularProgressBar percentage={Math.trunc((late)/present*100)} color={'yellow'}/>
                 </div>
-                <div className="ml-[10px] text-[20px]">
+                <div className="ml-[0.65rem] text-[1.2rem]">
                     <p>Late</p>
                     <p>{late}</p>
                 </div>

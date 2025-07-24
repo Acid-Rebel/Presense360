@@ -8,7 +8,7 @@ import settinsImage from './settings.png';
 function HeaderSideNav(props)
 {
     return(
-        <div className="min-h-screen">
+        <div className="min-h-screen  overflow-hidden">
             <header className="flex items-center justify-between bg-[#4F6C93] w-screen h-[4rem] text-white border-b-[0.25rem] border-b-[#111763]">
                     <div className='flex ml-[1.25rem] items-center text-[2rem]'>
                         <p>Presense360</p>
@@ -19,8 +19,8 @@ function HeaderSideNav(props)
                     </div>
             </header>
 
-            <div className='flex  h-[calc(100vh-4rem)]'>
-                <div className="flex bg-[#4F6C93]  w-[16rem]">
+            <div className='flex  flex-1 min-h-[calc(100vh-4rem)] w-screen '>
+                <div className=" bg-[#4F6C93]  w-[16rem] ">
                     <ul className='w-full'>
                        <li className='flex  cursor-pointer border-b-[0.15rem] border-b-[#111763] w-full h-[3.5rem]  items-center  text-[1rem] text-white hover:bg-[#111763]'>
                             <Link to="/" className='ml-[0.4rem] flex items-center'> 
@@ -53,7 +53,7 @@ function HeaderSideNav(props)
                     </ul>
                 </div>
             
-                <div className="bg-[#F0F0F0] flex-1 w-[calc(100vw-calc(100vh-4rem))]">
+                <div className="bg-[#F0F0F0] w-[calc(100vw-16rem)]">
                     {props.children}
                 </div>
             </div>

@@ -75,12 +75,12 @@ const DonutChart = () => {
   };
 
   return (
-    <div className="relative w-full bg-white mt-[10px]">
-        <div className='border-b-[#F0F0F0] border-b-3'>
-            <h2 className='ml-[5px]'>Department wise Attendance</h2>
+    <div className="relative w-full bg-white mt-[0.5rem]">
+        <div className='border-b-[#F0F0F0] border-b-[0.2rem]'>
+            <h2 className='ml-[0.3rem]'>Department wise Attendance</h2>
         </div>
       <button
-        className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-md p-2 rounded-full"
+        className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-md p-[0.5rem] rounded-full"
         onClick={() => scroll('left')}
       >
         <img src={leftArrorw} height={15} width={15}/>
@@ -89,11 +89,11 @@ const DonutChart = () => {
       {/* Scrollable Chart Container */}
       <div
         ref={scrollRef}
-        className="overflow-x-auto px-5 py-6 "
+        className="overflow-x-auto px-[1.25rem] py-[1.5rem] "
       >
        <div className="flex gap-4 h-[240px] ">
              <div className="w-[225px] h-[225px] flex-shrink-0">
-                 <h3 className='text-center text-[24px]'>Dept 1</h3>
+                 <h3 className='text-center text-[1.25rem]'>Dept 1</h3>
                  <Chart
                  type="doughnut"
                  data={chartData}
@@ -102,7 +102,7 @@ const DonutChart = () => {
                  /> 
              </div>
              <div className="w-[225px] h-[225px] flex-shrink-0">
-                 <h3 className='text-center text-[24px]'>Dept 2</h3>
+                 <h3 className='text-center text-[1.25rem]'>Dept 2</h3>
                  <Chart
                  type="doughnut"
                  data={chartData}
@@ -111,7 +111,7 @@ const DonutChart = () => {
                  /> 
              </div>
              <div className="w-[225px] h-[225px] flex-shrink-0">
-                 <h3 className='text-center text-[24px]'>Dept 3</h3>
+                 <h3 className='text-center text-[1.25rem]'>Dept 3</h3>
                  <Chart
                  type="doughnut"
                  data={chartData}
@@ -120,7 +120,7 @@ const DonutChart = () => {
                  /> 
              </div>
              <div className="w-[225px] h-[225px] flex-shrink-0">
-                 <h3 className='text-center text-[24px]'>Dept 4</h3>
+                 <h3 className='text-center text-[1.25rem]'>Dept 4</h3>
                  <Chart
                  type="doughnut"
                  data={chartData}
@@ -133,7 +133,7 @@ const DonutChart = () => {
 
       {/* Right Arrow */}
       <button
-        className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-md p-2 rounded-full"
+        className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-md p-[0.5rem] rounded-full"
         onClick={() => scroll('right')}
       >
         <img src={rightArrorw} height={15} width={15}/>
