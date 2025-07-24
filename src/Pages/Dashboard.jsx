@@ -32,31 +32,31 @@ function Dashboard() {
     if(day === 3) return 'Wednesday';
     if(day === 4) return 'Thursday';
     if(day === 5) return 'Friday';
-    if(day === 6) return 'Aatuday';
+    if(day === 6) return 'Satuday';
   }
 
   return (
     <>
       
-        <div className='flex w-full h-full '>
-          <div className='flex flex-col w-[775px] ml-[15px] '>
-            <h1 className='mt-[30px] text-[32px]'>Theekimootiyl Insurance Copporation </h1>
+        
+          <div className='flex flex-col w-[48.5rem] ml-[15px] '>
+            <h1 className='mt-[1.5rem] text-[32px]'>Theekimootiyl Insurance Copporation </h1>
             <h1 className='text-[24px]'>{getDayFormat(currDate.getDay())}, {currDate.getDate()}/{currDate.getMonth()}/{currDate.getFullYear()}</h1>
-            <div className='flex justify-between w-[775px]'>
+            <div className='flex justify-between w-full h-full'>
               <ProgressCircle data={{'present':present,'total':total, 'late':late}}/>
             </div>
-            <div>
+            {/* <div>
               <DonutChart/>
-            </div>
-            <div className=' flex justify-between h-[275px] mt-[15px]'>
+            </div> */}
+            {/* <div className=' flex justify-between h-[275px] mt-[15px]'>
               <AbsentBar type={'Absent'}/>
               <AbsentBar type={'Onleave'}/>
-            </div>
+            </div> */}
           </div>
-          <div className=' flex-1  w-[775px] ml-[15px] mr-[15px] mb-[15px] mt-[115px]'>
+          {/* <div className=' flex-1  w-[775px] ml-[15px] mr-[15px] mb-[15px] mt-[115px]'>
             <PresentBar/>
-          </div>
-        </div>
+          </div> */}
+
      
       
     </>

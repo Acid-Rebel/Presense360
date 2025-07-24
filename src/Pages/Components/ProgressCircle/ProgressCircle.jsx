@@ -8,8 +8,8 @@ function ProgressCircle(props)
     const absent=total-present;
     return(
         <>
-            <div className="h-[100px] w-[186px]  bg-[#FFFFFF] flex items-center">
-                <div className="ml-[5px]">
+            <div className="h-[6.23rem] w-[11.5rem]  bg-[#FFFFFF] flex items-center">
+                <div className="ml-[0.5rem]">
                     <CircularProgressBar percentage={Math.trunc(present/total*100)} color={'green'}/>
                 </div>
                 <div className="ml-[10px] text-[20px]">
@@ -18,8 +18,8 @@ function ProgressCircle(props)
                 </div>
             </div>
 
-            <div className="h-[100px] w-[186px] bg-[#FFFFFF] flex items-center">
-                <div className="ml-[5px]">
+            <div className="h-[6.23rem] w-[11.5rem] bg-[#FFFFFF] flex items-center">
+                <div className="ml-[0.5rem]">
                     <CircularProgressBar percentage={Math.trunc(absent/total*100) } color={'red'} />
                 </div>
                 <div className="ml-[10px] text-[20px]">
@@ -28,8 +28,8 @@ function ProgressCircle(props)
                 </div>
             </div>
 
-            <div className="h-[100px] w-[186px] bg-[#FFFFFF] flex items-center">
-                <div className="ml-[5px]">
+            <div className="h-[6.23rem] w-[11.5rem] bg-[#FFFFFF] flex items-center">
+                <div className="ml-[0.5rem]">
                     <CircularProgressBar percentage={Math.trunc((present-late)/present*100)} color={'green'}/>
                 </div>
                 <div className="ml-[10px] text-[20px]">
@@ -38,8 +38,8 @@ function ProgressCircle(props)
                 </div>
             </div>
 
-            <div className="h-[100px] w-[186px] bg-[#FFFFFF] flex items-center">
-                <div className="ml-[5px]">
+            <div className="h-[6.23rem] w-[11.5rem] bg-[#FFFFFF] flex items-center">
+                <div className="ml-[0.5rem]">
                     <CircularProgressBar percentage={Math.trunc((late)/present*100)} color={'yellow'}/>
                 </div>
                 <div className="ml-[10px] text-[20px]">

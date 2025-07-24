@@ -75,7 +75,7 @@ const DonutChart = () => {
   };
 
   return (
-    <div className="relative w-[775px] bg-white mt-[10px]">
+    <div className="relative w-full bg-white mt-[10px]">
         <div className='border-b-[#F0F0F0] border-b-3'>
             <h2 className='ml-[5px]'>Department wise Attendance</h2>
         </div>
