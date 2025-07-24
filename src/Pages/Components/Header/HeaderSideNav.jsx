@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'; 
 import userIamge from './user.png';
 import dashboardImage from './dashboard.png';
 import reportImage from './report.png';
@@ -22,9 +23,18 @@ function HeaderSideNav(props)
             <div className='flex '>
                 <div className="flex bg-[#4F6C93]  w-[16%]">
                     <ul className='navBar'>
-                        <li><img src={dashboardImage} height={27} width={27}/>Dashboard</li>
+                       <li>
+                            <Link to="/" className='flex items-center'>
+                                <img src={dashboardImage} height={27} width={27}/>
+                                Dashboard
+                            </Link>
+                            </li>
                         <li><img src={reportImage} height={27} width={27}/>Attendance Reports</li>
-                        <li><img src={employeeImage}height={27} width={27}/>Employees</li>
+                        <li>
+                            <Link to="/employees" className='flex items-center'>
+                            <img src={employeeImage}height={27} width={27}/>Employees
+                            </Link>
+                            </li>
                         <li><img src={requestImage}height={27} width={27}/>Leave Requests</li>
                         <li><img src={settinsImage}height={27} width={27}/>Settings</li>
                     </ul>

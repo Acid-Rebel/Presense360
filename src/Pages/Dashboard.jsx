@@ -37,7 +37,7 @@ function Dashboard() {
 
   return (
     <>
-      <HeaderSideNav>
+      
         <div className='flex w-full h-full '>
           <div className='flex flex-col w-[775px] ml-[15px] '>
             <h1 className='mt-[30px] text-[32px]'>Theekimootiyl Insurance Copporation </h1>
@@ -57,7 +57,7 @@ function Dashboard() {
             <PresentBar/>
           </div>
         </div>
-      </HeaderSideNav>
+     
       
     </>
   )
