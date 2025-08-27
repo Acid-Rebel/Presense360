@@ -51,6 +51,24 @@ const addEmployee = async (employeeData) => {
     return response.json();
 };
 
+// Function to update an existing employee 
+const updateEmployee = async (employeeData) => {
+  const response = await fetch(`${API_BASE_URL}/employees/${employeeData.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      Name: employeeData.name,
+      mobile: employeeData.phone,
+      Dept: employeeData.department,
+      LOCID: employeeData.location
+    }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update employee');
+  }
+  return response.json();
+};
+
 // Function to delete an employee
 const deleteEmployee = async (id) => {
     const response = await fetch(`${API_BASE_URL}/employees/${id}`, {
@@ -124,4 +142,14 @@ export const useUpdateFaceStatus = () => {
             queryClient.invalidateQueries({ queryKey: ['employees'] });
         },
     });
+};
+
+export const useUpdateEmployee = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateEmployee,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+    },
+  });
 };

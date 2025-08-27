@@ -1,14 +1,22 @@
-import { useState, useMemo } from 'react';
-import { useEmployees, useLocations, useDepartments, useAddEmployee, useDeleteEmployee, useUpdateFaceStatus } from './API/useEmployees';
+import { useState } from 'react';
+import { useEmployees, useLocations, useDepartments, useAddEmployee, useDeleteEmployee, useUpdateFaceStatus, useUpdateEmployee } from './API/useEmployees';
+import { PencilSquareIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
+
 
 function Employees() {
-  const [newEmployee, setNewEmployee] = useState({
+  // State for a new or editing employee
+  const [employeeData, setEmployeeData] = useState({
+    id: '',
     name: '',
     location: '',
     phone: '',
     department: '',
-    id: ''
   });
+  
+  // State to determine if we are editing an existing employee
+  const [editingEmployee, setEditingEmployee] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const { data: employees, isLoading, error } = useEmployees();
   const { data: locationOptions = [], isLoading: locationsLoading, error: locationsError } = useLocations();
@@ -17,20 +25,67 @@ function Employees() {
   const addEmployeeMutation = useAddEmployee();
   const deleteEmployeeMutation = useDeleteEmployee();
   const updateFaceStatusMutation = useUpdateFaceStatus();
+  const updateEmployeeMutation = useUpdateEmployee();
 
-  const handleAdd = (e) => {
-    e.preventDefault();
-    const { id, name, phone, department, location } = newEmployee;
-    if (!id || !name || !phone || !department || !location) return;
-
-    addEmployeeMutation.mutate({ 
-      id,
-      name, 
-      phone, 
-      department: parseInt(department), // Send the department ID as an integer
-      location 
+  const openModal = () => {
+    setIsModalOpen(true);
+    setErrorMessage('');
+  };
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingEmployee(null);
+    setEmployeeData({ id: '', name: '', location: '', phone: '', department: '' });
+    setErrorMessage('');
+  };
+  
+  // Sets the state to open the modal for updating
+  const handleUpdateClick = (employee) => {
+    setEditingEmployee(employee);
+    setEmployeeData({
+      id: employee.id,
+      name: employee.name,
+      location: employee.locid,
+      phone: employee.mobile,
+      department: employee.dept_id,
     });
-    setNewEmployee({ name: '', location: '', phone: '', department: '', id: '' });
+    openModal();
+  };
+
+  const handleAddOrUpdate = (e) => {
+    e.preventDefault();
+    const { id, name, phone, department, location } = employeeData;
+    if (!id || !name || !phone || !department || !location) {
+      setErrorMessage('Please fill in all fields.');
+      return;
+    }
+
+    const employeeToMutate = {
+      id,
+      name,
+      phone,
+      department: parseInt(department),
+      location,
+    };
+
+    if (editingEmployee) {
+      updateEmployeeMutation.mutate(employeeToMutate, {
+        onSuccess: () => {
+          closeModal();
+        },
+        onError: (err) => {
+          setErrorMessage(err.message || 'Failed to update employee.');
+        },
+      });
+    } else {
+      addEmployeeMutation.mutate(employeeToMutate, {
+        onSuccess: () => {
+          closeModal();
+        },
+        onError: (err) => {
+          setErrorMessage(err.message || 'Failed to add employee.');
+        },
+      });
+    }
   };
 
   const handleDelete = (id) => {
@@ -47,66 +102,24 @@ function Employees() {
     updateFaceStatusMutation.mutate({ id, status: 0 });
   };
 
-  if (isLoading || locationsLoading || departmentsLoading) return <div className="p-4">Loading data...</div>;
-  if (error || locationsError || departmentsError) return <div className="p-4 text-red-500">Error: {error?.message || locationsError?.message || departmentsError?.message}</div>;
+  if (isLoading || locationsLoading || departmentsLoading) {
+    return <div className="p-4">Loading data...</div>;
+  }
+  if (error || locationsError || departmentsError) {
+    return <div className="p-4 text-red-500">Error: {error?.message || locationsError?.message || departmentsError?.message}</div>;
+  }
 
   return (
     <div className="p-4">
       <h1 className="text-2xl font-semibold mb-4">Employees Management</h1>
-
-      {/* Add Employee Form */}
-      <form onSubmit={handleAdd} className="mb-6 flex flex-wrap gap-2">
-      <input
-          type="text"
-          placeholder="ID"
-          value={newEmployee.id}
-          onChange={(e) => setNewEmployee({ ...newEmployee, id: e.target.value })}
-          className="border p-2"
-        />
-        <input
-          type="text"
-          placeholder="Name"
-          value={newEmployee.name}
-          onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
-          className="border p-2"
-        />
-        <input
-          type="text"
-          placeholder="Phone"
-          value={newEmployee.phone}
-          onChange={(e) => setNewEmployee({ ...newEmployee, phone: e.target.value })}
-          className="border p-2"
-        />
-        {/* Department Dropdown */}
-        <select
-          value={newEmployee.department}
-          onChange={(e) => setNewEmployee({ ...newEmployee, department: e.target.value })}
-          className="border p-2"
-        >
-          <option value="">Select Department</option>
-          {departmentOptions?.map((dept) => (
-            <option key={dept.id} value={dept.id}>{dept.label}</option>
-          ))}
-        </select>
-        {/* Location Dropdown */}
-        <select
-          value={newEmployee.location}
-          onChange={(e) => setNewEmployee({ ...newEmployee, location: e.target.value })}
-          className="border p-2"
-        >
-          <option value="">Select Location</option>
-          {locationOptions?.map((loc, index) => (
-            <option key={index} value={loc}>{loc}</option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          disabled={addEmployeeMutation.isPending}
-        >
-          {addEmployeeMutation.isPending ? 'Adding...' : 'Add Employee'}
-        </button>
-      </form>
+      
+      {/* Button to open the modal */}
+      <button
+        onClick={openModal}
+        className="bg-blue-500 text-white px-4 py-2 rounded mb-6"
+      >
+        Add New Employee
+      </button>
 
       {/* Employee Table */}
       <table className="min-w-full border text-sm">
@@ -127,10 +140,17 @@ function Employees() {
               <td className="border p-2">{emp.id}</td>
               <td className="border p-2">{emp.name}</td>
               <td className="border p-2">{emp.mobile}</td>
-              <td className="border p-2">{emp.dept_label}</td> {/* Use dept_label from backend */}
+              <td className="border p-2">{emp.dept_label}</td>
               <td className="border p-2">{emp.locid}</td>
               <td className="border p-2">{emp.face_status === 2 ? '✅' : '❌'}</td>
               <td className="border p-2 space-x-2">
+                <button
+                  className="bg-blue-500 text-white px-2 py-1 rounded"
+                  onClick={() => handleUpdateClick(emp)}
+                  disabled={updateEmployeeMutation.isPending}
+                >
+                  Update
+                </button>
                 <button
                   className="bg-red-500 text-white px-2 py-1 rounded"
                   onClick={() => handleDelete(emp.id)}
@@ -139,37 +159,105 @@ function Employees() {
                   {deleteEmployeeMutation.isPending ? 'Deleting...' : 'Delete'}
                 </button>
                 {emp.face_status === 1 ? (
-                    <button
-                        className="bg-orange-500 text-white px-2 py-1 rounded"
-                        onClick={() => handleFaceUnregister(emp.id)}
-                        disabled={updateFaceStatusMutation.isPending}
-                    >
-                        Face Registration Pending
-                    </button>
-                ) : emp.face_status === 0 ?(
-                    <button
-                        className="bg-green-500 text-white px-2 py-1 rounded"
-                        onClick={() => handleFaceRegister(emp.id)}
-                        disabled={updateFaceStatusMutation.isPending}
-                    >
-                        Enable Face Registration 
-                    </button>
-                ):
-                (
-                    <button
-                        className="bg-green-500 text-white px-2 py-1 rounded"
-                        onClick={() => handleFaceUnregister(emp.id)}
-                        disabled={updateFaceStatusMutation.isPending}
-                    >
-                        Remove Face Registration
-                    </button>
-                )
-                }
+                  <button
+                    className="bg-orange-500 text-white px-2 py-1 rounded"
+                    onClick={() => handleFaceUnregister(emp.id)}
+                    disabled={updateFaceStatusMutation.isPending}
+                  >
+                    Face Registration Pending
+                  </button>
+                ) : emp.face_status === 0 ? (
+                  <button
+                    className="bg-green-500 text-white px-2 py-1 rounded"
+                    onClick={() => handleFaceRegister(emp.id)}
+                    disabled={updateFaceStatusMutation.isPending}
+                  >
+                    Enable Face Registration 
+                  </button>
+                ) : (
+                  <button
+                    className="bg-green-500 text-white px-2 py-1 rounded"
+                    onClick={() => handleFaceUnregister(emp.id)}
+                    disabled={updateFaceStatusMutation.isPending}
+                  >
+                    Remove Face Registration
+                  </button>
+                )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Modal for adding employee */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">
+                  {editingEmployee ? 'Update Employee' : 'Add New Employee'}
+              </h2>
+              <button onClick={closeModal} className="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+             {errorMessage && (
+              <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">
+                {errorMessage}
+              </div>
+            )}
+            <form onSubmit={handleAddOrUpdate} className="flex flex-col gap-4">
+              <input
+                type="text"
+                placeholder="ID"
+                value={employeeData.id}
+                onChange={(e) => setEmployeeData({ ...employeeData, id: e.target.value })}
+                className="border p-2 rounded w-full"
+                disabled={!!editingEmployee}
+              />
+              <input
+                type="text"
+                placeholder="Name"
+                value={employeeData.name}
+                onChange={(e) => setEmployeeData({ ...employeeData, name: e.target.value })}
+                className="border p-2 rounded w-full"
+              />
+              <input
+                type="text"
+                placeholder="Phone"
+                value={employeeData.phone}
+                onChange={(e) => setEmployeeData({ ...employeeData, phone: e.target.value })}
+                className="border p-2 rounded w-full"
+              />
+              <select
+                value={employeeData.department}
+                onChange={(e) => setEmployeeData({ ...employeeData, department: e.target.value })}
+                className="border p-2 rounded w-full"
+              >
+                <option value="">Select Department</option>
+                {departmentOptions?.map((dept) => (
+                  <option key={dept.id} value={dept.id}>{dept.label}</option>
+                ))}
+              </select>
+              <select
+                value={employeeData.location}
+                onChange={(e) => setEmployeeData({ ...employeeData, location: e.target.value })}
+                className="border p-2 rounded w-full"
+              >
+                <option value="">Select Location</option>
+                {locationOptions?.map((loc, index) => (
+                  <option key={index} value={loc}>{loc}</option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded w-full"
+                disabled={addEmployeeMutation.isPending || updateEmployeeMutation.isPending}
+              >
+                {editingEmployee ? 'Update Employee' : 'Add Employee'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
