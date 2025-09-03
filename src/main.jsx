@@ -14,7 +14,7 @@ createRoot(document.getElementById('root')).render(
     <HashRouter>
       <HeaderSideNav>
         <Routes>
-          <Route path="/Presense360" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/employees" element={<Employees />} />
         </Routes>
