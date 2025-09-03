@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = 'https://presense360-server.onrender.com/api';
 
 // Function to fetch all employees
 const fetchEmployees = async () => {
