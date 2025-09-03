@@ -30,7 +30,7 @@ function HeaderSideNav(props) {
                     <ul className='w-full'>
                         
                         <li className='flex cursor-pointer border-b-2 border-b-[#111763] w-full h-14 items-center text-white hover:bg-[#111763]'> 
-                            <Link to="/" className='flex items-center px-4 py-2 text-sm md:text-base lg:text-lg w-full'> 
+                            <Link to="/dashboard" className='flex items-center px-4 py-2 text-sm md:text-base lg:text-lg w-full'> 
                                 <img src={dashboardImage} className='w-5 h-5 md:w-6 md:h-6 mr-3 object-contain' alt="Dashboard" /> 
                                 Dashboard
                             </Link>
