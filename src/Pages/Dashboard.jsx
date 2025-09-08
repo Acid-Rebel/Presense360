@@ -79,7 +79,7 @@ function Dashboard() {
 </div>
 
 {/* Main content row */}
-<div className='flex flex-col md:flex-row px-4 lg:px-6 w-full mt-4' style={{ height: '1000px' }}>
+<div className='flex flex-col md:flex-row px-4 lg:px-6 w-full mt-4 overflow-hidden' style={{ height: '1000px' }}>
   
   {/* Left column */}
   <div className='flex flex-col w-full md:w-2/3 lg:w-3/4 xl:w-2/3 md:pr-4 h-full'>
@@ -95,7 +95,7 @@ function Dashboard() {
     </div>
 
     {/* Absent/OnLeave bars - 50% */}
-    <div className='flex flex-col sm:flex-row justify-between mt-2 gap-4 overflow-y-auto pb-4' style={{ flex: '0 0 48.5%' }}>
+    <div className='flex flex-col sm:flex-row justify-between mt-2 gap-4 overflow-hidden pb-4' style={{ flex: '0 0 48.5%' }}>
       <AbsentBar type={'Absent'} />
       <AbsentBar type={'Onleave'} />
     </div>
