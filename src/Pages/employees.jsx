@@ -234,7 +234,17 @@ function Employees() {
                           >
                             Enable Face Registration
                           </button>
-                        ) : (
+                        ) : 
+                        emp.face_status === 1 ?
+                        (
+                          <button
+                            className="block w-full text-left px-4 py-2 hover:bg-gray-50"
+                            onClick={() => handleFaceUnregister(emp.id)}
+                          >
+                            Face Registration Pending
+                          </button>
+                        )
+                        :(
                           <button
                             className="block w-full text-left px-4 py-2 hover:bg-gray-50"
                             onClick={() => handleFaceUnregister(emp.id)}
