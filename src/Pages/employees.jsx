@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   useEmployees,
   useLocations,
@@ -25,6 +25,8 @@ function Employees() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Active");
 
+  const [selectedEmployee, setSelectedEmployee] = useState(null); // 👈 for details popup
+
   const { data: employees, isLoading, error } = useEmployees();
   const { data: locationOptions = [] } = useLocations();
   const { data: departmentOptions = [] } = useDepartments();
@@ -33,6 +35,19 @@ function Employees() {
   const deleteEmployeeMutation = useDeleteEmployee();
   const updateFaceStatusMutation = useUpdateFaceStatus();
   const updateEmployeeMutation = useUpdateEmployee();
+
+  const menuRef = useRef(null);
+
+  // 👇 Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -117,8 +132,6 @@ function Employees() {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-     
-
       {/* Main Content */}
       <main className="flex-1 p-6">
         {/* Breadcrumb */}
@@ -185,7 +198,10 @@ function Employees() {
                       alt={emp.name}
                       className="h-8 w-8 rounded-full"
                     />
-                    <span className="text-blue-600 cursor-pointer hover:underline">
+                    <span
+                      className="text-blue-600 cursor-pointer hover:underline"
+                      onClick={() => setSelectedEmployee(emp)} // 👈 Open details modal
+                    >
                       {emp.name}
                     </span>
                   </td>
@@ -202,7 +218,7 @@ function Employees() {
                     )}
                   </td>
                   <td className="p-3">{emp.hire_date || "-"}</td>
-                  <td className="p-3 text-center relative">
+                  <td className="p-3 text-center relative" ref={menuRef}>
                     <button
                       onClick={() =>
                         setOpenMenuId(openMenuId === emp.id ? null : emp.id)
@@ -214,7 +230,7 @@ function Employees() {
 
                     {/* Dropdown */}
                     {openMenuId === emp.id && (
-                      <div className="absolute right-6 top-8 w-48 bg-white border rounded shadow-lg z-10">
+                      <div className="absolute right-6 top-8 w-48 bg-white border rounded shadow-lg z-20">
                         <button
                           className="block w-full text-left px-4 py-2 hover:bg-gray-50"
                           onClick={() => handleUpdateClick(emp)}
@@ -251,7 +267,7 @@ function Employees() {
           </table>
         </div>
 
-        {/* Modal */}
+        {/* Add/Edit Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex justify-center items-center">
             <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
@@ -320,7 +336,10 @@ function Employees() {
                 <select
                   value={employeeData.location}
                   onChange={(e) =>
-                    setEmployeeData({ ...employeeData, location: e.target.value })
+                    setEmployeeData({
+                      ...employeeData,
+                      location: e.target.value,
+                    })
                   }
                   className="border p-2 rounded w-full"
                 >
@@ -345,6 +364,91 @@ function Employees() {
             </div>
           </div>
         )}
+
+        {/* Details Modal when clicking employee name */}
+        {/* Details Modal when clicking employee name */}
+{selectedEmployee && (
+  <div
+    className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50"
+    onClick={() => setSelectedEmployee(null)}
+  >
+    <div
+      className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg animate-fadeIn"
+      onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+    >
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4 border-b pb-3">
+        <h2 className="text-xl font-bold text-gray-800">
+          Employee Details
+        </h2>
+        <button
+          onClick={() => setSelectedEmployee(null)}
+          className="text-gray-400 hover:text-gray-700 transition"
+        >
+          &times;
+        </button>
+      </div>
+
+      {/* Profile Info */}
+      <div className="flex flex-col items-center mb-6">
+        <img
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+            selectedEmployee.name
+          )}&background=random&size=128`}
+          alt={selectedEmployee.name}
+          className="h-20 w-20 rounded-full shadow-md mb-3"
+        />
+        <h3 className="text-lg font-semibold text-gray-800">
+          {selectedEmployee.name}
+        </h3>
+        <p className="text-sm text-gray-500">{selectedEmployee.email || "-"}</p>
+      </div>
+
+      {/* Details Grid */}
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500 text-xs">Employee ID</p>
+          <p className="font-medium text-gray-800">{selectedEmployee.id}</p>
+        </div>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500 text-xs">Phone</p>
+          <p className="font-medium text-gray-800">{selectedEmployee.mobile}</p>
+        </div>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500 text-xs">Department</p>
+          <p className="font-medium text-gray-800">
+            {selectedEmployee.dept_label}
+          </p>
+        </div>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500 text-xs">Location</p>
+          <p className="font-medium text-gray-800">{selectedEmployee.locid}</p>
+        </div>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500 text-xs">Hire Date</p>
+          <p className="font-medium text-gray-800">
+            {selectedEmployee.hire_date || "-"}
+          </p>
+        </div>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500 text-xs">Face Status</p>
+          <span
+            className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+              selectedEmployee.face_status === 0
+                ? "bg-red-100 text-red-700"
+                : "bg-green-100 text-green-700"
+            }`}
+          >
+            {selectedEmployee.face_status === 0
+              ? "Not Registered"
+              : "Registered"}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
       </main>
     </div>
   );
