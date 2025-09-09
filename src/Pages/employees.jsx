@@ -446,12 +446,14 @@ function Employees() {
             className={`inline-block px-2 py-1 rounded text-xs font-medium ${
               selectedEmployee.face_status === 0
                 ? "bg-red-100 text-red-700"
+                :selectedEmployee.face_status === 1? "bg-orange-100 text-orange-700"
                 : "bg-green-100 text-green-700"
             }`}
           >
             {selectedEmployee.face_status === 0
               ? "Not Registered"
-              : "Registered"}
+              : selectedEmployee.face_status === 1? "Pending"
+              :"Registered"}
           </span>
         </div>
       </div>
