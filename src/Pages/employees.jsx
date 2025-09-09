@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useEmployees, useLocations, useDepartments, useAddEmployee, useDeleteEmployee, useUpdateFaceStatus, useUpdateEmployee } from './API/useEmployees';
-import { PencilSquareIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import searchIcon from './Assets/2946467-200.png';
 
 
 function Employees() {
@@ -113,81 +113,90 @@ function Employees() {
     <div className="p-4">
       <h1 className="text-2xl font-semibold mb-4">Employees Management</h1>
       
-      {/* Button to open the modal */}
-      <button
-        onClick={openModal}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-6"
-      >
-        Add New Employee
-      </button>
+      <div className='bg-[#FFFFFF] px-3 py-3'>
+        {/* Button to open the modal */}
+        <div className='flex justify-between'>
+          <div className='flex justify-between rounded border-1 py-2 px-1 mb-3'>
+            <input type='text' placeholder="Search" className='focus:outline-none'></input>
+            <img src={searchIcon} className='w-5 h-5 md:w-6 md:h-6 mr-3 object-contain' />
+          </div>
+          <button
+            onClick={openModal}
+            className="bg-blue-500 text-white px-4 py-2 rounded mb-3 "
+          >
+            Add New Employee
+          </button>
+        </div>
 
-      {/* Employee Table */}
-      <table className="min-w-full border text-sm">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border p-2">ID</th>
-            <th className="border p-2">Name</th>
-            <th className="border p-2">Phone</th>
-            <th className="border p-2">Department</th>
-            <th className="border p-2">Location</th>
-            <th className="border p-2">Face Registered</th>
-            <th className="border p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees?.map(emp => (
-            <tr key={emp.id}>
-              <td className="border p-2">{emp.id}</td>
-              <td className="border p-2">{emp.name}</td>
-              <td className="border p-2">{emp.mobile}</td>
-              <td className="border p-2">{emp.dept_label}</td>
-              <td className="border p-2">{emp.locid}</td>
-              <td className="border p-2">{emp.face_status === 2 ? '✅' : '❌'}</td>
-              <td className="border p-2 space-x-2">
-                <button
-                  className="bg-blue-500 text-white px-2 py-1 rounded"
-                  onClick={() => handleUpdateClick(emp)}
-                  disabled={updateEmployeeMutation.isPending}
-                >
-                  Update
-                </button>
-                <button
-                  className="bg-red-500 text-white px-2 py-1 rounded"
-                  onClick={() => handleDelete(emp.id)}
-                  disabled={deleteEmployeeMutation.isPending}
-                >
-                  {deleteEmployeeMutation.isPending ? 'Deleting...' : 'Delete'}
-                </button>
-                {emp.face_status === 1 ? (
-                  <button
-                    className="bg-orange-500 text-white px-2 py-1 rounded"
-                    onClick={() => handleFaceUnregister(emp.id)}
-                    disabled={updateFaceStatusMutation.isPending}
-                  >
-                    Face Registration Pending
-                  </button>
-                ) : emp.face_status === 0 ? (
-                  <button
-                    className="bg-green-500 text-white px-2 py-1 rounded"
-                    onClick={() => handleFaceRegister(emp.id)}
-                    disabled={updateFaceStatusMutation.isPending}
-                  >
-                    Enable Face Registration 
-                  </button>
-                ) : (
-                  <button
-                    className="bg-green-500 text-white px-2 py-1 rounded"
-                    onClick={() => handleFaceUnregister(emp.id)}
-                    disabled={updateFaceStatusMutation.isPending}
-                  >
-                    Remove Face Registration
-                  </button>
-                )}
-              </td>
+        {/* Employee Table */}
+      
+        <table className="min-w-full border text-sm">
+          <thead>
+            <tr >
+              <th className="border p-2">ID</th>
+              <th className="border p-2">Name</th>
+              <th className="border p-2">Phone</th>
+              <th className="border p-2">Department</th>
+              <th className="border p-2">Location</th>
+              <th className="border p-2">Face Registered</th>
+              <th className="border p-2">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {employees?.map(emp => (
+              <tr key={emp.id}>
+                <td className="border p-2">{emp.id}</td>
+                <td className="border p-2">{emp.name}</td>
+                <td className="border p-2">{emp.mobile}</td>
+                <td className="border p-2">{emp.dept_label}</td>
+                <td className="border p-2">{emp.locid}</td>
+                <td className="border p-2">{emp.face_status === 2 ? '✅' : '❌'}</td>
+                <td className="border p-2 space-x-2">
+                  <button
+                    className="bg-blue-500 text-white px-2 py-1 rounded"
+                    onClick={() => handleUpdateClick(emp)}
+                    disabled={updateEmployeeMutation.isPending}
+                  >
+                    Update
+                  </button>
+                  <button
+                    className="bg-red-500 text-white px-2 py-1 rounded"
+                    onClick={() => handleDelete(emp.id)}
+                    disabled={deleteEmployeeMutation.isPending}
+                  >
+                    {deleteEmployeeMutation.isPending ? 'Deleting...' : 'Delete'}
+                  </button>
+                  {emp.face_status === 1 ? (
+                    <button
+                      className="bg-orange-500 text-white px-2 py-1 rounded"
+                      onClick={() => handleFaceUnregister(emp.id)}
+                      disabled={updateFaceStatusMutation.isPending}
+                    >
+                      Face Registration Pending
+                    </button>
+                  ) : emp.face_status === 0 ? (
+                    <button
+                      className="bg-green-500 text-white px-2 py-1 rounded"
+                      onClick={() => handleFaceRegister(emp.id)}
+                      disabled={updateFaceStatusMutation.isPending}
+                    >
+                      Enable Face Registration 
+                    </button>
+                  ) : (
+                    <button
+                      className="bg-green-500 text-white px-2 py-1 rounded"
+                      onClick={() => handleFaceUnregister(emp.id)}
+                      disabled={updateFaceStatusMutation.isPending}
+                    >
+                      Remove Face Registration
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* Modal for adding employee */}
       {isModalOpen && (
