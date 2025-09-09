@@ -279,7 +279,7 @@ function Employees() {
 
         {/* Add/Edit Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex justify-center items-center">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">
