@@ -62,7 +62,7 @@ function HeaderSideNav(props) {
                         </li>
 
                         <li className='flex cursor-pointer w-full h-14 items-center text-black hover:bg-[#E7FAFF]'>
-                            <Link to="/" className='flex items-center px-4 py-2 text-sm md:text-base lg:text-lg w-full'>
+                            <Link to="/leave" className='flex items-center px-4 py-2 text-sm md:text-base lg:text-lg w-full'>
                                 <img src={requestImage} className='w-5 h-5 md:w-6 md:h-6 mr-3 object-contain' alt="Requests" />
                                 Leave Requests
                             </Link>
