@@ -33,6 +33,7 @@ const fetchAttendanceRecords = async () => {
         locId: record.locid,
         status: record.final_status, // Inferred status string (e.g., 'Late', 'On Leave')
         exception: record.exception_reason, // Reason for exception, if any
+        dept: record.dept_label,
 
         // Ensure numeric fields are correctly typed:
         duration: parseFloat(record.duration_hours) || 0,

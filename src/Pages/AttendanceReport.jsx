@@ -59,6 +59,7 @@ const AttendanceReport = () => {
   const [searchEmployee, setSearchEmployee] = useState('');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('All');
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+  const [currDate,setDate]=useState(new Date());
   
   // Custom Date States
   const [customStartDate, setCustomStartDate] = useState('');
@@ -93,7 +94,7 @@ const AttendanceReport = () => {
 
 
   // NOTE: Anchor date for mock filtering is 2025-10-21 (Today)
-  const REFERENCE_DATE = new Date('2025-10-21T12:00:00'); 
+  const REFERENCE_DATE = currDate; 
 
   // --------------------------------------------------------------------
   // 1. Data Processing and Filtering
@@ -306,7 +307,7 @@ const AttendanceReport = () => {
         {/* Actionable Exceptions Table */}
         <div className="bg-white p-5 rounded-xl shadow-md lg:col-span-2 border">
           <h2 className="text-xl font-semibold mb-4 text-red-600">
-            Actionable Exceptions ({generalSummary.filteredData.filter(item => item.exception_reason).length})
+            Actionable Exceptions ({generalSummary.filteredData.filter(item => item.exception).length})
           </h2>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
@@ -321,14 +322,14 @@ const AttendanceReport = () => {
               </thead>
               <tbody>
                 {/* Use exception_reason from backend */}
-                {generalSummary.filteredData.filter(item => item.exception_reason).map(item => (
+                {generalSummary.filteredData.filter(item => item.exception).map(item => (
                   <tr key={`${item.id}-${item.date}`} className="border-t">
-                    <td className="p-3">{item.employee_name}</td>
-                    <td className="p-3">{item.currdate}</td>
+                    <td className="p-3">{item.name}</td>
+                    <td className="p-3">{item.date.substring(0, 10)}</td>
                     <td className="p-3">
-                      <StatusBadge status={item.final_status} />
+                      <StatusBadge status={item.status} />
                     </td>
-                    <td className="p-3 text-yellow-600 font-medium">{item.exception_reason}</td>
+                    <td className="p-3 text-yellow-600 font-medium">{item.exception}</td>
                     <td className="p-3 text-center">
                       <button className="text-xs bg-blue-500 text-white px-3 py-1 rounded-full hover:bg-blue-600 transition">
                         Resolve/Approve
@@ -382,22 +383,22 @@ const AttendanceReport = () => {
               {generalSummary.filteredData.map(item => (
                 <tr key={`${item.id}-${item.date}-log`} className="border-t hover:bg-gray-50">
                   <td className="p-3">{item.name}</td>
-                  <td className="p-3">{item.date}</td>
+                  <td className="p-3">{item.date.substring(0, 10)}</td>
                   <td className="p-3 font-medium text-gray-700">{item.checkin || '-'}</td>
                   <td className="p-3 font-medium text-gray-700">{item.checkout || '-'}</td>
                   <td className="p-3 text-blue-600 font-semibold">
-  {/* FIX: Ensure item.duration_hours is treated as a number (coalescing to 0 if null/undefined) */}
-  {Number(item.duration_hours || 0).toFixed(2)}
-</td>
+                  {/* FIX: Ensure item.duration_hours is treated as a number (coalescing to 0 if null/undefined) */}
+                  {Number(item.duration).toFixed(2)}
+                  </td>
                   <td className="p-3 flex items-center gap-1">
                     <MapPinIcon className="w-4 h-4 text-gray-500" />
-                    {item.locid || '-'}
+                    {item.locId || '-'}
                   </td>
                   <td className="p-3 text-center">
                     <StatusBadge status={item.faceStatus} isFace={true} />
                   </td>
                   <td className="p-3">
-                    <StatusBadge status={item.exception} />
+                    <StatusBadge status={item.status} />
                   </td>
                 </tr>
               ))}
@@ -498,11 +499,11 @@ const AttendanceReport = () => {
                 </thead>
                 <tbody>
                     {filteredData.map(item => (
-                        <tr key={item.currdate} className="border-t hover:bg-gray-50">
-                            <td className="p-3">{item.date}</td>
+                        <tr key={item.date} className="border-t hover:bg-gray-50">
+                            <td className="p-3">{item.date.substring(0, 10)}</td>
                             <td className="p-3">{item.checkin || '-'}</td>
                             <td className="p-3">{item.checkout || '-'}</td>
-                            <td className="p-3">{item.duration || '-'}</td>
+                            <td className="p-3">{item.duration.toFixed(2) || '-'}</td>
                             
                             <td className="p-3">
                                 {item.exception ? (
