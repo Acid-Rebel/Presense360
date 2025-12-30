@@ -35,6 +35,12 @@ function Dashboard() {
     if(day === 6) return 'Saturday';
   }
 
+  function getMonthName(month) {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    return months[month];
+  }
+
   return (
     <>
       
@@ -71,10 +77,10 @@ function Dashboard() {
 <div className='flex flex-col w-full px-4 lg:px-6'>
   {/* Title and date */}
   <h1 className='mt-4 text-xl md:text-2xl lg:text-3xl font-semibold'>
-       Theekimootiyl Insurance Corporation
+       Presense360 Pvt. Ltd.
   </h1>
   <h1 className='text-lg md:text-xl lg:text-2xl text-gray-700'>
-       {getDayFormat(currDate.getDay())}, {currDate.getDate()}/{currDate.getMonth() + 1}/{currDate.getFullYear()}
+       {currDate.getDate()} {getMonthName(currDate.getMonth())}, {currDate.getFullYear()} ({getDayFormat(currDate.getDay())})
   </h1>
 </div>
 

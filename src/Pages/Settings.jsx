@@ -216,15 +216,17 @@ const SettingsPage = () => {
               <span>/</span>
               <span className="text-indigo-600">Settings</span>
             </nav>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight">System Settings</h1>
-            <p className="text-sm font-semibold text-slate-500 mt-1">Configure geofencing boundaries and shift protocols</p>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2 ">
+                Settings
+            </h1>
+            <p className="text-sm font-semibold text-slate-500 mt-0.5">Configure geofencing boundaries and shift protocols</p>
           </div>
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
               <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">System Active</span>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {statusMessage && (

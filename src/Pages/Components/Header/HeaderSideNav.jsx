@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import userIamge from './user.png';
 import dashboardImage from './dashboard.png';
@@ -10,9 +10,14 @@ import menuIcon from './menu--v3.png'
 
 function HeaderSideNav(props) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const location = useLocation();
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    const isActive = (path) => {
+        return location.pathname === path;
     };
 
     return (
@@ -29,7 +34,7 @@ function HeaderSideNav(props) {
 
                 <div className='flex items-center text-base md:text-lg lg:text-xl h-full'> 
                     <button className='flex items-center cursor-pointer hover:bg-[#3048AC] h-full px-3 py-2 rounded'> 
-                        <span className="mr-2">Username</span> 
+                        <span className="mr-2">admin</span> 
                         <img src={userIamge} className="w-6 h-6 md:w-8 md:h-8 object-contain" alt="User" /> 
                     </button>
                 </div>
@@ -38,41 +43,66 @@ function HeaderSideNav(props) {
             <div className='flex flex-1 w-full'> 
                 
                 {/* Sidebar */}
-                <div className={`${isSidebarOpen ? 'w-48 md:w-64 lg:w-72' : 'w-0'} bg-[#FFFFFF] flex-shrink-0 border-r border-gray-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.15)] relative z-10 overflow-hidden transition-all duration-300`}>
+                <div className={`${isSidebarOpen ? 'w-48 md:w-64 lg:w-72' : 'w-20'} bg-[#F5F8FF] flex-shrink-0 border-r border-blue-100 shadow-[2px_0_4px_-1px_rgba(94,92,219,0.15)] relative z-10 transition-all duration-300`}>
                     <ul className='w-full'>
-                        <li className='flex cursor-pointer w-full h-14 items-center text-black hover:bg-[#E7FAFF]'> 
-                            <Link to="/dashboard" className='flex items-center px-4 py-2 text-sm md:text-base lg:text-lg w-full'> 
-                                <img src={dashboardImage} className='w-5 h-5 md:w-6 md:h-6 mr-3 object-contain' alt="Dashboard" /> 
-                                Dashboard
+                        <li className={`flex cursor-pointer w-full h-14 items-center text-black hover:bg-[#DDE7FF] ${isActive('/dashboard') ? 'bg-[#DDE7FF] border-l-4 border-[#5E5CDB]' : ''} group relative`}> 
+                            <Link to="/dashboard" className={`flex items-center ${isSidebarOpen ? 'px-4' : 'px-0 justify-center'} py-2 text-sm md:text-base lg:text-lg w-full ${isActive('/dashboard') ? 'font-semibold text-[#5E5CDB]' : ''}`}> 
+                                <img src={dashboardImage} className={`w-5 h-5 md:w-6 md:h-6 ${isSidebarOpen ? 'mr-3' : ''} object-contain`} alt="Dashboard" /> 
+                                {isSidebarOpen && 'Dashboard'}
                             </Link>
+                            {!isSidebarOpen && (
+                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                    Dashboard
+                                </div>
+                            )}
                         </li>
 
-                        <li className='flex cursor-pointer w-full h-14 items-center text-black hover:bg-[#E7FAFF]'>
-                            <Link to="/attendance" className='flex items-center px-4 py-2 text-sm md:text-base lg:text-lg w-full'>
-                                <img src={reportImage} className='w-5 h-5 md:w-6 md:h-6 mr-3 object-contain' alt="Reports" />
-                                Attendance Reports
+                        <li className={`flex cursor-pointer w-full h-14 items-center text-black hover:bg-[#DDE7FF] ${isActive('/attendance') ? 'bg-[#DDE7FF] border-l-4 border-[#5E5CDB]' : ''} group relative`}>
+                            <Link to="/attendance" className={`flex items-center ${isSidebarOpen ? 'px-4' : 'px-0 justify-center'} py-2 text-sm md:text-base lg:text-lg w-full ${isActive('/attendance') ? 'font-semibold text-[#5E5CDB]' : ''}`}>
+                                <img src={reportImage} className={`w-5 h-5 md:w-6 md:h-6 ${isSidebarOpen ? 'mr-3' : ''} object-contain`} alt="Reports" />
+                                {isSidebarOpen && 'Attendance Reports'}
                             </Link>
+                            {!isSidebarOpen && (
+                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                    Attendance Reports
+                                </div>
+                            )}
                         </li>
 
-                        <li className='flex cursor-pointer w-full h-14 items-center text-black hover:bg-[#E7FAFF]'>
-                            <Link to="/employees" className='flex items-center px-4 py-2 text-sm md:text-base lg:text-lg w-full'>
-                                <img src={employeeImage} className='w-5 h-5 md:w-6 md:h-6 mr-3 object-contain' alt="Employees" />
-                                Employees
+                        <li className={`flex cursor-pointer w-full h-14 items-center text-black hover:bg-[#DDE7FF] ${isActive('/employees') ? 'bg-[#DDE7FF] border-l-4 border-[#5E5CDB]' : ''} group relative`}>
+                            <Link to="/employees" className={`flex items-center ${isSidebarOpen ? 'px-4' : 'px-0 justify-center'} py-2 text-sm md:text-base lg:text-lg w-full ${isActive('/employees') ? 'font-semibold text-[#5E5CDB]' : ''}`}>
+                                <img src={employeeImage} className={`w-5 h-5 md:w-6 md:h-6 ${isSidebarOpen ? 'mr-3' : ''} object-contain`} alt="Employees" />
+                                {isSidebarOpen && 'Employees'}
                             </Link>
+                            {!isSidebarOpen && (
+                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                    Employees
+                                </div>
+                            )}
                         </li>
 
-                        <li className='flex cursor-pointer w-full h-14 items-center text-black hover:bg-[#E7FAFF]'>
-                            <Link to="/leave" className='flex items-center px-4 py-2 text-sm md:text-base lg:text-lg w-full'>
-                                <img src={requestImage} className='w-5 h-5 md:w-6 md:h-6 mr-3 object-contain' alt="Requests" />
-                                Leave Requests
+                        <li className={`flex cursor-pointer w-full h-14 items-center text-black hover:bg-[#DDE7FF] ${isActive('/leave') ? 'bg-[#DDE7FF] border-l-4 border-[#5E5CDB]' : ''} group relative`}>
+                            <Link to="/leave" className={`flex items-center ${isSidebarOpen ? 'px-4' : 'px-0 justify-center'} py-2 text-sm md:text-base lg:text-lg w-full ${isActive('/leave') ? 'font-semibold text-[#5E5CDB]' : ''}`}>
+                                <img src={requestImage} className={`w-5 h-5 md:w-6 md:h-6 ${isSidebarOpen ? 'mr-3' : ''} object-contain`} alt="Requests" />
+                                {isSidebarOpen && 'Leave Requests'}
                             </Link>
+                            {!isSidebarOpen && (
+                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                    Leave Requests
+                                </div>
+                            )}
                         </li>
 
-                        <li className='flex cursor-pointer w-full h-14 items-center text-black hover:bg-[#E7FAFF]'>
-                            <Link to="/settings" className='flex items-center px-4 py-2 text-sm md:text-base lg:text-lg w-full'>
-                                <img src={settinsImage} className='w-5 h-5 md:w-6 md:h-6 mr-3 object-contain' alt="Settings" />
-                                Settings
+                        <li className={`flex cursor-pointer w-full h-14 items-center text-black hover:bg-[#DDE7FF] ${isActive('/settings') ? 'bg-[#DDE7FF] border-l-4 border-[#5E5CDB]' : ''} group relative`}>
+                            <Link to="/settings" className={`flex items-center ${isSidebarOpen ? 'px-4' : 'px-0 justify-center'} py-2 text-sm md:text-base lg:text-lg w-full ${isActive('/settings') ? 'font-semibold text-[#5E5CDB]' : ''}`}>
+                                <img src={settinsImage} className={`w-5 h-5 md:w-6 md:h-6 ${isSidebarOpen ? 'mr-3' : ''} object-contain`} alt="Settings" />
+                                {isSidebarOpen && 'Settings'}
                             </Link>
+                            {!isSidebarOpen && (
+                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                    Settings
+                                </div>
+                            )}
                         </li>
                     </ul>
                 </div>

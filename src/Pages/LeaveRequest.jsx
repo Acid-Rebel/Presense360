@@ -344,8 +344,11 @@ const HRLeaveDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 p-6 sm:p-10">
+            {/* Breadcrumb */}
+            <div className="text-sm text-gray-500 mb-4">Home / Leave Requests</div>
+            
             <h1 className="text-3xl font-bold text-gray-800 mb-8 border-b pb-2">
-                HR Leave Request Dashboard
+                Leave Requests
             </h1>
 
             {/* --- Summary Cards --- */}

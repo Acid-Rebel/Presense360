@@ -60,6 +60,7 @@ const AttendanceReport = () => {
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('All');
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
   const [currDate,setDate]=useState(new Date());
+  const [approvedExceptions, setApprovedExceptions] = useState(new Set());
   
   // Custom Date States
   const [customStartDate, setCustomStartDate] = useState('');
@@ -292,6 +293,10 @@ const AttendanceReport = () => {
   if (isLoadingAttendance || isLoadingEmployees || isLoadingDepartments) return <div className="p-6 text-xl">Loading attendance data...</div>;
   if (errorAttendance) return <div className="p-6 text-xl text-red-500">Error loading attendance records: {errorAttendance.message}</div>;
 
+  const handleApproveException = (itemId, itemDate) => {
+    const key = `${itemId}-${itemDate}`;
+    setApprovedExceptions(prev => new Set([...prev, key]));
+  };
 
   const GeneralReportView = () => (
     <>
@@ -322,21 +327,33 @@ const AttendanceReport = () => {
               </thead>
               <tbody>
                 {/* Use exception_reason from backend */}
-                {generalSummary.filteredData.filter(item => item.exception).map(item => (
-                  <tr key={`${item.id}-${item.date}`} className="border-t">
-                    <td className="p-3">{item.name}</td>
-                    <td className="p-3">{item.date.substring(0, 10)}</td>
-                    <td className="p-3">
-                      <StatusBadge status={item.status} />
-                    </td>
-                    <td className="p-3 text-yellow-600 font-medium">{item.exception}</td>
-                    <td className="p-3 text-center">
-                      <button className="text-xs bg-blue-500 text-white px-3 py-1 rounded-full hover:bg-blue-600 transition">
-                        Resolve/Approve
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {generalSummary.filteredData.filter(item => item.exception).map(item => {
+                  const isApproved = approvedExceptions.has(`${item.id}-${item.date}`);
+                  return (
+                    <tr key={`${item.id}-${item.date}`} className="border-t">
+                      <td className="p-3">{item.name}</td>
+                      <td className="p-3">{item.date.substring(0, 10)}</td>
+                      <td className="p-3">
+                        <StatusBadge status={item.status} />
+                      </td>
+                      <td className="p-3 text-yellow-600 font-medium">{item.exception}</td>
+                      <td className="p-3 text-center">
+                        {isApproved ? (
+                          <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
+                            Approved
+                          </span>
+                        ) : (
+                          <button 
+                            onClick={() => handleApproveException(item.id, item.date)}
+                            className="text-xs bg-blue-500 text-white px-3 py-1 rounded-full hover:bg-blue-600 transition"
+                          >
+                            Resolve/Approve
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -375,7 +392,6 @@ const AttendanceReport = () => {
                 <th className="p-3 text-left">Check Out</th>
                 <th className="p-3 text-left">Duration (h)</th>
                 <th className="p-3 text-left">Location</th>
-                <th className="p-3 text-center">Face Auth</th>
                 <th className="p-3 text-left">Final Status</th>
               </tr>
             </thead>
@@ -393,9 +409,6 @@ const AttendanceReport = () => {
                   <td className="p-3 flex items-center gap-1">
                     <MapPinIcon className="w-4 h-4 text-gray-500" />
                     {item.locId || '-'}
-                  </td>
-                  <td className="p-3 text-center">
-                    <StatusBadge status={item.faceStatus} isFace={true} />
                   </td>
                   <td className="p-3">
                     <StatusBadge status={item.status} />
@@ -533,8 +546,11 @@ const AttendanceReport = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Breadcrumb */}
+      <div className="text-sm text-gray-500 mb-4">Home / Attendance Reports</div>
+      
       <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
-        Presense360 Attendance Reports
+        Attendance Reports
       </h1>
 
       {/* View Toggle */}
