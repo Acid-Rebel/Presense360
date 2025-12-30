@@ -7,6 +7,7 @@ import Employees from './Pages/employees.jsx';
 import AttendanceReport from './Pages/AttendanceReport.jsx';
 import HeaderSideNav from './Pages/Components/Header/HeaderSideNav.jsx';
 import LeaveDashboard from './Pages/LeaveRequest.jsx'
+import SettingsPage from './Pages/Settings.jsx'
 import './index.css';
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/employees" element={<Employees />} />
           <Route path="/attendance" element={<AttendanceReport />} />
           <Route path="/leave" element={<LeaveDashboard />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </HeaderSideNav>
     </HashRouter>
