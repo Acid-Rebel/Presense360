@@ -2,26 +2,74 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   MapPin, Clock, Trash2, Plus, Save, Settings as SettingsIcon, Navigation,
   CheckCircle2, AlertCircle, Map as MapIcon, X, Layers, Loader2, Maximize,
-  ChevronDown, Building2
+  ChevronDown, Building2, ShieldAlert
 } from 'lucide-react';
 import { 
   useQuery, useMutation, useQueryClient, QueryClient, QueryClientProvider 
 } from '@tanstack/react-query';
 
 /**
+ * --- AUTH HELPERS ---
+ */
+const getAuthToken = () => {
+    const name = "admin_token=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1);
+        if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+    }
+    return null;
+};
+
+const decodeJWT = (token) => {
+    try {
+        if (!token) return null;
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        return null;
+    }
+};
+
+const useAdmin = () => {
+    const token = getAuthToken();
+    const decoded = decodeJWT(token);
+    const role = decoded?.role || 'VIEW_ONLY';
+    return {
+        role,
+        isSuperAdmin: role === 'SUPER_ADMIN',
+        username: decoded?.admin_id || 'Admin'
+    };
+};
+
+/**
  * --- API LAYER ---
  */
 const BASE_URL = 'https://presense360-server.onrender.com/api'; 
 
+const getHeaders = () => {
+    const token = getAuthToken();
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+    };
+};
+
 export const getLocations = async () => {
-    const response = await fetch(`${BASE_URL}/settings/locations`);
+    const response = await fetch(`${BASE_URL}/settings/locations`, { headers: getHeaders() });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const result = await response.json();
     return result.data; 
 };
 
 export const getDepartments = async () => {
-    const response = await fetch(`${BASE_URL}/departments`);
+    const response = await fetch(`${BASE_URL}/departments`, { headers: getHeaders() });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const result = await response.json();
     return result.data; 
@@ -30,7 +78,7 @@ export const getDepartments = async () => {
 export const saveLocation = async (locationData) => {
     const response = await fetch(`${BASE_URL}/settings/locations`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(locationData)
     });
     if (!response.ok) throw new Error('Failed to save location');
@@ -39,32 +87,26 @@ export const saveLocation = async (locationData) => {
 
 export const deleteLocation = async (id) => {
     const response = await fetch(`${BASE_URL}/settings/locations/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getHeaders()
     });
     if (!response.ok) throw new Error('Failed to delete location');
     return response.json();
 };
 
 const fetchShiftSettings = async (deptId) => {
-    const response = await fetch(`${BASE_URL}/settings/shift/${deptId}`);
+    const response = await fetch(`${BASE_URL}/settings/shift/${deptId}`, { headers: getHeaders() });
     if (!response.ok) return { entryCap: '09:00', exitCap: '18:00' };
-    const data = await response.json();
-    return data.data || { entryCap: '09:00', exitCap: '18:00' };
+    const result = await response.json();
+    return result.data || { entryCap: '09:00', exitCap: '18:00' };
 };
 
 const updateShiftSettings = async ({ deptId, entryCap, exitCap }) => {
     const response = await fetch(`${BASE_URL}/settings/shift`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // We send both deptId and department_id to ensure backend compatibility
-        body: JSON.stringify({ 
-          deptId: deptId, 
-          department_id: deptId,
-          entryCap, 
-          exitCap 
-        }),
+        headers: getHeaders(),
+        body: JSON.stringify({ deptId, entryCap, exitCap }),
     });
-    
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to update shift settings.');
@@ -77,15 +119,12 @@ const updateShiftSettings = async ({ deptId, entryCap, exitCap }) => {
  */
 const useSettingsHooks = (selectedDeptId) => {
     const queryClient = useQueryClient();
-
     const locationsQuery = useQuery({ queryKey: ['locations'], queryFn: getLocations });
-    
     const shiftSettingsQuery = useQuery({ 
         queryKey: ['shiftSettings', selectedDeptId], 
         queryFn: () => fetchShiftSettings(selectedDeptId),
         enabled: !!selectedDeptId
     });
-    
     const departmentsQuery = useQuery({ queryKey: ['departments'], queryFn: getDepartments });
 
     const saveLocationMutation = useMutation({
@@ -100,9 +139,7 @@ const useSettingsHooks = (selectedDeptId) => {
 
     const updateShiftMutation = useMutation({
         mutationFn: updateShiftSettings,
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['shiftSettings', selectedDeptId] });
-        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shiftSettings', selectedDeptId] }),
     });
 
     return {
@@ -117,6 +154,7 @@ const useSettingsHooks = (selectedDeptId) => {
 };
 
 const SettingsPage = () => {
+  const { role, isSuperAdmin } = useAdmin();
   const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedDept, setSelectedDept] = useState('all');
   
@@ -135,7 +173,6 @@ const SettingsPage = () => {
   const drawingLayerRef = useRef(null);
   const savedLayersRef = useRef([]);
 
-  // Sync internal form state when shiftData is fetched from DB
   useEffect(() => {
     if (shiftData) {
       setShiftForm({
@@ -164,7 +201,13 @@ const SettingsPage = () => {
     if (!mapInstanceRef.current) {
       mapInstanceRef.current = L.map(mapContainerRef.current).setView([10.9025, 76.8962], 17);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapInstanceRef.current);
-      mapInstanceRef.current.on('click', (e) => setCurrentPoints(prev => [...prev, [e.latlng.lat, e.latlng.lng]]));
+      
+      // ONLY ALLOW CLICKS IF SUPER ADMIN
+      mapInstanceRef.current.on('click', (e) => {
+        if (isSuperAdmin) {
+            setCurrentPoints(prev => [...prev, [e.latlng.lat, e.latlng.lng]]);
+        }
+      });
     }
     savedLayersRef.current.forEach(layer => layer.remove());
     savedLayersRef.current = [];
@@ -183,7 +226,7 @@ const SettingsPage = () => {
       else if (currentPoints.length === 2) L.polyline(currentPoints, { color: '#f59e0b', dashArray: '5, 5' }).addTo(layerGroup);
       drawingLayerRef.current = layerGroup;
     }
-  }, [mapLoaded, locations, currentPoints]);
+  }, [mapLoaded, locations, currentPoints, isSuperAdmin]);
 
   const showStatus = (msg, type = "success") => {
     setStatusMessage({ msg, type });
@@ -192,6 +235,7 @@ const SettingsPage = () => {
 
   const handleUpdateShift = async (e) => {
     e.preventDefault();
+    if (!isSuperAdmin) return;
     try {
       await updateShiftMutation.mutateAsync({ deptId: selectedDept, ...shiftForm });
       showStatus("Shift updated successfully");
@@ -216,17 +260,19 @@ const SettingsPage = () => {
               <span>/</span>
               <span className="text-indigo-600">Settings</span>
             </nav>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2 ">
-                Settings
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Settings</h1>
             <p className="text-sm font-semibold text-slate-500 mt-0.5">Configure geofencing boundaries and shift protocols</p>
           </div>
-          {/* <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">System Active</span>
-            </div>
-          </div> */}
+          
+          {/* ROLE INDICATOR */}
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border shadow-sm ${
+            isSuperAdmin ? 'bg-indigo-50 border-indigo-100 text-indigo-700' : 'bg-amber-50 border-amber-100 text-amber-700'
+          }`}>
+            {isSuperAdmin ? <ShieldAlert size={14} /> : <Clock size={14} />}
+            <span className="text-[10px] font-black uppercase tracking-tighter">
+              {isSuperAdmin ? 'Super Admin Mode' : 'Read-Only Access'}
+            </span>
+          </div>
         </div>
 
         {statusMessage && (
@@ -257,7 +303,6 @@ const SettingsPage = () => {
                     >
                       <option value="all">All Departments</option>
                       {departments.map((dept) => (
-                        // Fix for key warning: Handle ID or id
                         <option key={dept.ID || dept.id} value={dept.ID || dept.id}>{dept.label}</option>
                       ))}
                     </select>
@@ -266,33 +311,48 @@ const SettingsPage = () => {
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 relative">
-                  {isShiftLoading && (
+                  {(isShiftLoading) && (
                     <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center backdrop-blur-sm rounded-lg">
                       <Loader2 size={16} className="animate-spin text-indigo-500" />
                     </div>
                   )}
                   <div>
                     <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Entry Start</label>
-                    <input type="time" value={shiftForm.entryCap} onChange={(e) => setShiftForm({...shiftForm, entryCap: e.target.value})} className="w-full px-3 py-2 rounded-lg border border-slate-200 font-bold text-slate-700 bg-slate-50 text-sm" />
+                    <input 
+                      type="time" 
+                      value={shiftForm.entryCap} 
+                      onChange={(e) => setShiftForm({...shiftForm, entryCap: e.target.value})} 
+                      disabled={!isSuperAdmin}
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 font-bold text-slate-700 bg-slate-50 text-sm disabled:opacity-50" 
+                    />
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Exit End</label>
-                    <input type="time" value={shiftForm.exitCap} onChange={(e) => setShiftForm({...shiftForm, exitCap: e.target.value})} className="w-full px-3 py-2 rounded-lg border border-slate-200 font-bold text-slate-700 bg-slate-50 text-sm" />
+                    <input 
+                      type="time" 
+                      value={shiftForm.exitCap} 
+                      onChange={(e) => setShiftForm({...shiftForm, exitCap: e.target.value})} 
+                      disabled={!isSuperAdmin}
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 font-bold text-slate-700 bg-slate-50 text-sm disabled:opacity-50" 
+                    />
                   </div>
                 </div>
                 
-                <button 
-                  type="submit" 
-                  disabled={updateShiftMutation.isPending} 
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 text-white font-black text-[10px] uppercase py-3 rounded-xl shadow-md active:scale-95 flex items-center justify-center gap-2 transition-all"
-                >
-                  {updateShiftMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} 
-                  Update Shift
-                </button>
+                {/* HIDE BUTTON IF NOT SUPER ADMIN */}
+                {isSuperAdmin && (
+                    <button 
+                      type="submit" 
+                      disabled={updateShiftMutation.isPending} 
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 text-white font-black text-[10px] uppercase py-3 rounded-xl shadow-md active:scale-95 flex items-center justify-center gap-2 transition-all"
+                    >
+                      {updateShiftMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} 
+                      Update Shift
+                    </button>
+                )}
               </form>
             </section>
 
-            {currentPoints.length > 0 && (
+            {currentPoints.length > 0 && isSuperAdmin && (
               <section className="bg-slate-900 rounded-2xl p-4 text-white shadow-xl animate-in zoom-in-95">
                 <div className="flex justify-between items-center mb-3 text-[10px] font-black uppercase text-indigo-400">
                   <span>Vertex Queue</span>
@@ -314,27 +374,36 @@ const SettingsPage = () => {
             <section className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
               <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div className="flex items-center gap-2 font-bold text-xs uppercase"><MapIcon size={16} className="text-indigo-600" /> Boundary Designer</div>
-                <div className="flex gap-2">
-                  <input type="text" placeholder="Location Name" value={newLocationName} onChange={(e) => setNewLocationName(e.target.value)} className="px-3 py-2 text-xs rounded-lg border border-slate-200 w-32 md:w-48 font-bold shadow-inner" />
-                  <button 
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      if (!newLocationName || currentPoints.length < 3) return showStatus("Name + 3 points required", "error");
-                      let final = [...currentPoints];
-                      if (final[0][0] !== final[final.length-1][0]) final.push(final[0]);
-                      try { await saveLocationMutation.mutateAsync({ id: newLocationName, coordinates: final }); setNewLocationName(''); setCurrentPoints([]); showStatus("Geofence saved"); }
-                      catch (err) { showStatus(err.message, "error"); }
-                    }} 
-                    disabled={currentPoints.length < 3 || saveLocationMutation.isPending} 
-                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 text-white text-[10px] font-black uppercase px-4 py-2 rounded-lg transition-all"
-                  >
-                    {saveLocationMutation.isPending ? 'Saving...' : 'Save Zone'}
-                  </button>
-                </div>
+                
+                {/* HIDE INPUTS IF NOT SUPER ADMIN */}
+                {isSuperAdmin && (
+                    <div className="flex gap-2">
+                        <input type="text" placeholder="Location Name" value={newLocationName} onChange={(e) => setNewLocationName(e.target.value)} className="px-3 py-2 text-xs rounded-lg border border-slate-200 w-32 md:w-48 font-bold shadow-inner" />
+                        <button 
+                            onClick={async (e) => {
+                            e.preventDefault();
+                            if (!newLocationName || currentPoints.length < 3) return showStatus("Name + 3 points required", "error");
+                            let final = [...currentPoints];
+                            if (final[0][0] !== final[final.length-1][0]) final.push(final[0]);
+                            try { await saveLocationMutation.mutateAsync({ id: newLocationName, coordinates: final }); setNewLocationName(''); setCurrentPoints([]); showStatus("Geofence saved"); }
+                            catch (err) { showStatus(err.message, "error"); }
+                            }} 
+                            disabled={currentPoints.length < 3 || saveLocationMutation.isPending} 
+                            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 text-white text-[10px] font-black uppercase px-4 py-2 rounded-lg transition-all"
+                        >
+                            {saveLocationMutation.isPending ? 'Saving...' : 'Save Zone'}
+                        </button>
+                    </div>
+                )}
               </div>
               <div className="h-[450px] w-full relative">
                 <div ref={mapContainerRef} className="h-full w-full" />
                 {!mapLoaded && <div className="absolute inset-0 bg-slate-50 flex items-center justify-center"><Loader2 className="animate-spin text-indigo-500" /></div>}
+                {!isSuperAdmin && mapLoaded && (
+                    <div className="absolute bottom-4 left-4 z-[1000] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2">
+                        <AlertCircle size={12} /> Interactive drawing disabled for your role
+                    </div>
+                )}
               </div>
             </section>
 
@@ -357,8 +426,12 @@ const SettingsPage = () => {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex justify-end gap-2">
-                            <button onClick={() => focusOnLocation(loc)} className="p-2 text-slate-400 hover:text-indigo-600"><Maximize size={16}/></button>
-                            <button onClick={() => { if(window.confirm('Delete geofence?')) deleteLocationMutation.mutate(loc.id) }} className="p-2 text-slate-400 hover:text-red-600 transition-colors"><Trash2 size={16} /></button>
+                            <button onClick={() => focusOnLocation(loc)} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><Maximize size={16}/></button>
+                            
+                            {/* HIDE DELETE BUTTON IF NOT SUPER ADMIN */}
+                            {isSuperAdmin && (
+                                <button onClick={() => { if(window.confirm('Delete geofence?')) deleteLocationMutation.mutate(loc.id) }} className="p-2 text-slate-400 hover:text-red-600 transition-colors"><Trash2 size={16} /></button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -370,7 +443,7 @@ const SettingsPage = () => {
           </div>
         </div>
       </div>
-      <style>{`.custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; } .leaflet-container { z-index: 1 !important; cursor: crosshair !important; border-radius: 0 0 1rem 1rem; }`}</style>
+      <style>{`.custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; } .leaflet-container { z-index: 1 !important; cursor: ${isSuperAdmin ? 'crosshair' : 'grab'} !important; border-radius: 0 0 1rem 1rem; }`}</style>
     </div>
   );
 };

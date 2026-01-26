@@ -7,6 +7,7 @@ import {
   useDeleteEmployee,
   useUpdateFaceStatus,
   useUpdateEmployee,
+  useAdmin, // 👈 Imported the new hook
 } from "./API/useEmployees";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 
@@ -25,23 +26,22 @@ function Employees() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Active");
 
-  const [selectedEmployee, setSelectedEmployee] = useState(null); // 👈 for details popup
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const { data: employees, isLoading, error } = useEmployees();
   const { data: locationOptions = [] } = useLocations();
   const { data: departmentOptions = [] } = useDepartments();
+  const { isAuthorized } = useAdmin(); // 👈 Get authorization status
 
   const addEmployeeMutation = useAddEmployee();
   const deleteEmployeeMutation = useDeleteEmployee();
   const updateFaceStatusMutation = useUpdateFaceStatus();
   const updateEmployeeMutation = useUpdateEmployee();
 
-  const menuRef = useRef(null); // Ref applied to the dropdown container
+  const menuRef = useRef(null);
 
-  // 👇 Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Check if the click occurred outside the dropdown menu
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setOpenMenuId(null);
       }
@@ -69,7 +69,6 @@ function Employees() {
 
   const handleUpdateClick = (employee) => {
     setEditingEmployee(employee);
-    // Note: dept_id is the integer ID required by the backend
     setEmployeeData({
       id: employee.id,
       name: employee.name,
@@ -77,7 +76,7 @@ function Employees() {
       phone: employee.mobile,
       department: employee.dept, 
     });
-    setOpenMenuId(null); // Close the menu immediately
+    setOpenMenuId(null);
     openModal();
   };
 
@@ -93,7 +92,7 @@ function Employees() {
       id,
       name,
       phone,
-      department: parseInt(department), // Ensure department is an integer ID
+      department: parseInt(department),
       location,
     };
 
@@ -113,21 +112,19 @@ function Employees() {
   };
 
   const handleDelete = (id) => {
-    setOpenMenuId(null); // Close the menu immediately
+    setOpenMenuId(null);
     if (window.confirm("Are you sure you want to delete this employee?")) {
       deleteEmployeeMutation.mutate(id);
     }
   };
 
   const handleFaceRegister = (id) => {
-    setOpenMenuId(null); // Close the menu immediately
-    // 1 corresponds to "Face registration is enabled, user needs to register from phone"
+    setOpenMenuId(null);
     updateFaceStatusMutation.mutate({ id, status: 1 }); 
   };
 
   const handleFaceUnregister = (id) => {
-    setOpenMenuId(null); // Close the menu immediately
-    // 0 corresponds to "Face registration not enabled" (Clear local embeddings/disable access)
+    setOpenMenuId(null);
     updateFaceStatusMutation.mutate({ id, status: 0 });
   };
 
@@ -140,25 +137,24 @@ function Employees() {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Main Content */}
       <main className="flex-1 p-6">
-        {/* Breadcrumb */}
         <div className="text-sm text-gray-500 mb-4">Home / Employees</div>
 
-        {/* Top Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-xl font-semibold">Company Employees</h1>
           <div className="space-x-2">
-            <button
-              onClick={openModal}
-              className="px-4 py-2 border rounded hover:bg-gray-50"
-            >
-              + Add Employees
-            </button>
+            {/* 👈 ONLY SHOW ADD BUTTON IF AUTHORIZED */}
+            {isAuthorized && (
+              <button
+                onClick={openModal}
+                className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 transition-colors"
+              >
+                + Add Employees
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Search + Filter */}
         <div className="flex items-center gap-4 mb-4">
           <input
             type="text"
@@ -177,53 +173,50 @@ function Employees() {
           </select>
         </div>
 
-        {/* Employees Table */}
-        <div className="bg-white rounded shadow">
+        <div className="bg-white rounded shadow overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="bg-gray-50">
-                <th className="p-3 text-left">ID</th>
-                <th className="p-3 text-left">Name</th>
-                <th className="p-3 text-left">Department</th>
-                <th className="p-3 text-left">Contact</th>
-                <th className="p-3 text-left">Location</th>
-                <th className="p-3 text-left">Face Status</th>
-                <th className="p-3 text-center">Actions</th>
+              <tr className="bg-gray-50 text-gray-600 uppercase text-[10px] font-bold tracking-wider">
+                <th className="p-4 text-left">ID</th>
+                <th className="p-4 text-left">Name</th>
+                <th className="p-4 text-left">Department</th>
+                <th className="p-4 text-left">Contact</th>
+                <th className="p-4 text-left">Location</th>
+                <th className="p-4 text-left">Face Status</th>
+                <th className="p-4 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100">
               {filteredEmployees?.map((emp) => (
-                <tr key={emp.id} className="border-t hover:bg-gray-50">
-                  <td className="p-3">{emp.id}</td>
-                  <td className="p-3 flex items-center gap-2">
+                <tr key={emp.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 font-medium text-gray-900">{emp.id}</td>
+                  <td className="p-4 flex items-center gap-3">
                     <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        emp.name
-                      )}&background=random`}
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=random`}
                       alt={emp.name}
-                      className="h-8 w-8 rounded-full"
+                      className="h-8 w-8 rounded-full shadow-sm"
                     />
                     <span
-                      className="text-blue-600 cursor-pointer hover:underline"
-                      onClick={() => setSelectedEmployee(emp)} // 👈 Open details modal
+                      className="text-blue-600 font-semibold cursor-pointer hover:underline"
+                      onClick={() => setSelectedEmployee(emp)}
                     >
                       {emp.name}
                     </span>
                   </td>
-                  <td className="p-3">{emp.dept_label}</td>
-                  <td className="p-3">
-                    <div>{emp.mobile}</div>
-                    <div className="text-xs text-gray-500">{emp.email || "-"}</div>
+                  <td className="p-4 text-gray-600">{emp.dept_label}</td>
+                  <td className="p-4">
+                    <div className="text-gray-900 font-medium">{emp.mobile}</div>
+                    <div className="text-[10px] text-gray-400">{emp.email || "-"}</div>
                   </td>
-                  <td className="p-3">{emp.locid}</td>
-                  <td className="p-3">
+                  <td className="p-4 text-gray-600">{emp.locid}</td>
+                  <td className="p-4">
                     <span
-                      className={`px-2 py-1 text-xs font-medium rounded ${
+                      className={`px-2 py-1 text-[10px] font-bold uppercase rounded-full ${
                         emp.face_status === 0
-                          ? "bg-red-100 text-red-700"
+                          ? "bg-red-50 text-red-600 border border-red-100"
                           : emp.face_status === 1
-                          ? "bg-orange-100 text-orange-700"
-                          : "bg-green-100 text-green-700"
+                          ? "bg-orange-50 text-orange-600 border border-orange-100"
+                          : "bg-green-50 text-green-600 border border-green-100"
                       }`}
                     >
                       {emp.face_status === 0
@@ -233,52 +226,55 @@ function Employees() {
                         : "Registered"}
                     </span>
                   </td>
-                  <td className="p-3 text-center relative">
-                    {/* Inner wrapper for the menu with the ref */}
+                  <td className="p-4 text-center">
                     <div className="relative inline-block">
                       <button
                         onClick={() =>
                           setOpenMenuId(openMenuId === emp.id ? null : emp.id)
                         }
-                        className="p-1 hover:bg-gray-100 rounded"
+                        className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
                       >
-                        <EllipsisVerticalIcon className="h-5 w-5 text-gray-600" />
+                        <EllipsisVerticalIcon className="h-5 w-5 text-gray-400" />
                       </button>
 
-                      {/* Dropdown Container */}
                       {openMenuId === emp.id && (
                         <div 
-                          className="absolute right-6 top-8 w-48 bg-white border rounded shadow-lg z-20"
-                          ref={menuRef} // Apply ref here for external click detection
+                          className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-100"
+                          ref={menuRef}
                         >
-                          <button
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-50"
-                            onClick={() => handleUpdateClick(emp)}
-                          >
-                            Update Info
-                          </button>
-                          <button
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-50 text-red-500"
-                            onClick={() => handleDelete(emp.id)}
-                          >
-                            Delete
-                          </button>
-                          <div className="border-t my-1"></div>
+                          {/* 👈 ONLY SHOW UPDATE/DELETE IF AUTHORIZED */}
+                          {isAuthorized && (
+                            <>
+                              <button
+                                className="block w-full text-left px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                                onClick={() => handleUpdateClick(emp)}
+                              >
+                                Update Info
+                              </button>
+                              <button
+                                className="block w-full text-left px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                                onClick={() => handleDelete(emp.id)}
+                              >
+                                Delete Employee
+                              </button>
+                              <div className="border-t border-gray-50 my-1"></div>
+                            </>
+                          )}
                           
-                          {/* Face Status Actions */}
+                          {/* FACE REGISTRATION (UNTOUCHED) */}
                           {emp.face_status === 2 ? (
                             <button
-                              className="block w-full text-left px-4 py-2 hover:bg-gray-50 text-orange-600"
+                              className="block w-full text-left px-4 py-2.5 text-sm font-semibold text-orange-600 hover:bg-orange-50 transition-colors"
                               onClick={() => handleFaceUnregister(emp.id)}
                             >
-                              Reset/Remove Face
+                              Reset Face Data
                             </button>
                           ) : (
                             <button
-                              className="block w-full text-left px-4 py-2 hover:bg-gray-50 text-green-600"
+                              className="block w-full text-left px-4 py-2.5 text-sm font-semibold text-green-600 hover:bg-green-50 transition-colors"
                               onClick={() => handleFaceRegister(emp.id)}
                             >
-                              Enable Face Registration
+                              Enable Face Reg.
                             </button>
                           )}
                         </div>
@@ -291,185 +287,124 @@ function Employees() {
           </table>
         </div>
 
-        {/* Add/Edit Modal (No change needed here, logic is sound) */}
+        {/* Modal Logic remains unchanged */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">
-                  {editingEmployee ? "Update Employee" : "Add New Employee"}
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+            <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md animate-in slide-in-from-bottom-4 duration-300">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-black text-gray-800 tracking-tight">
+                  {editingEmployee ? "Update Record" : "Register Employee"}
                 </h2>
-                <button
-                  onClick={closeModal}
-                  className="text-gray-500 hover:text-gray-800"
-                >
-                  &times;
+                <button onClick={closeModal} className="text-gray-400 hover:text-gray-800 transition-colors">
+                  <span className="text-2xl">&times;</span>
                 </button>
               </div>
               {errorMessage && (
-                <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">
+                <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-xs font-bold uppercase border border-red-100">
                   {errorMessage}
                 </div>
               )}
-              <form onSubmit={handleAddOrUpdate} className="flex flex-col gap-4">
+              <form onSubmit={handleAddOrUpdate} className="space-y-4">
                 <input
                   type="text"
-                  placeholder="ID"
+                  placeholder="Employee ID"
                   value={employeeData.id}
-                  onChange={(e) =>
-                    setEmployeeData({ ...employeeData, id: e.target.value })
-                  }
-                  className="border p-2 rounded w-full"
+                  onChange={(e) => setEmployeeData({ ...employeeData, id: e.target.value })}
+                  className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-semibold"
                   disabled={!!editingEmployee}
                 />
                 <input
                   type="text"
-                  placeholder="Name"
+                  placeholder="Full Name"
                   value={employeeData.name}
-                  onChange={(e) =>
-                    setEmployeeData({ ...employeeData, name: e.target.value })
-                  }
-                  className="border p-2 rounded w-full"
+                  onChange={(e) => setEmployeeData({ ...employeeData, name: e.target.value })}
+                  className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-semibold"
                 />
                 <input
                   type="text"
-                  placeholder="Phone"
+                  placeholder="Mobile Number"
                   value={employeeData.phone}
-                  onChange={(e) =>
-                    setEmployeeData({ ...employeeData, phone: e.target.value })
-                  }
-                  className="border p-2 rounded w-full"
+                  onChange={(e) => setEmployeeData({ ...employeeData, phone: e.target.value })}
+                  className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-semibold"
                 />
                 <select
                   value={employeeData.department}
-                  onChange={(e) =>
-                    setEmployeeData({
-                      ...employeeData,
-                      department: e.target.value,
-                    })
-                  }
-                  className="border p-2 rounded w-full"
+                  onChange={(e) => setEmployeeData({ ...employeeData, department: e.target.value })}
+                  className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-bold text-gray-700 bg-gray-50"
                 >
                   <option value="">Select Department</option>
                   {departmentOptions?.map((dept) => (
-                    <option key={dept.id} value={dept.id}>
-                      {dept.label}
-                    </option>
+                    <option key={dept.id} value={dept.id}>{dept.label}</option>
                   ))}
                 </select>
                 <select
                   value={employeeData.location}
-                  onChange={(e) =>
-                    setEmployeeData({
-                      ...employeeData,
-                      location: e.target.value,
-                    })
-                  }
-                  className="border p-2 rounded w-full"
+                  onChange={(e) => setEmployeeData({ ...employeeData, location: e.target.value })}
+                  className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-bold text-gray-700 bg-gray-50"
                 >
-                  <option value="">Select Location</option>
+                  <option value="">Select Primary Location</option>
                   {locationOptions?.map((loc, index) => (
-                    <option key={index} value={loc}>
-                      {loc}
-                    </option>
+                    <option key={index} value={loc}>{loc}</option>
                   ))}
                 </select>
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded w-full"
-                  disabled={
-                    addEmployeeMutation.isPending ||
-                    updateEmployeeMutation.isPending
-                  }
+                  className="w-full bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest py-4 rounded-xl shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all"
+                  disabled={addEmployeeMutation.isPending || updateEmployeeMutation.isPending}
                 >
-                  {editingEmployee ? "Update Employee" : "Add Employee"}
+                  {editingEmployee ? "Commit Changes" : "Create Record"}
                 </button>
               </form>
             </div>
           </div>
         )}
 
-        {/* Details Modal when clicking employee name (No change needed here, logic is sound) */}
+        {/* Details Modal (Selected Employee) */}
         {selectedEmployee && (
-          <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50"
-            onClick={() => setSelectedEmployee(null)}
-          >
-            <div
-              className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg animate-fadeIn"
-              onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
-            >
-              {/* Header */}
-              <div className="flex justify-between items-center mb-4 border-b pb-3">
-                <h2 className="text-xl font-bold text-gray-800">
-                  Employee Details
-                </h2>
-                <button
-                  onClick={() => setSelectedEmployee(null)}
-                  className="text-gray-400 hover:text-gray-700 transition"
-                >
-                  &times;
-                </button>
-              </div>
-
-              {/* Profile Info */}
-              <div className="flex flex-col items-center mb-6">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4" onClick={() => setSelectedEmployee(null)}>
+            <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col items-center mb-8">
                 <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    selectedEmployee.name
-                  )}&background=random&size=128`}
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(selectedEmployee.name)}&background=random&size=128`}
                   alt={selectedEmployee.name}
-                  className="h-20 w-20 rounded-full shadow-md mb-3"
+                  className="h-24 w-24 rounded-3xl shadow-xl mb-4 border-4 border-white"
                 />
-                <h3 className="text-lg font-semibold text-gray-800">
-                  {selectedEmployee.name}
-                </h3>
-                <p className="text-sm text-gray-500">{selectedEmployee.email || "-"}</p>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">{selectedEmployee.name}</h3>
+                <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mt-1">{selectedEmployee.dept_label}</p>
               </div>
 
-              {/* Details Grid */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-gray-500 text-xs">Employee ID</p>
-                  <p className="font-medium text-gray-800">{selectedEmployee.id}</p>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Employee ID</span>
+                  <span className="text-sm font-bold text-gray-700">{selectedEmployee.id}</span>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-gray-500 text-xs">Phone</p>
-                  <p className="font-medium text-gray-800">{selectedEmployee.mobile}</p>
+                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Phone</span>
+                  <span className="text-sm font-bold text-gray-700">{selectedEmployee.mobile}</span>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-gray-500 text-xs">Department</p>
-                  <p className="font-medium text-gray-800">
-                    {selectedEmployee.dept_label}
-                  </p>
+                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Location</span>
+                  <span className="text-sm font-bold text-gray-700">{selectedEmployee.locid}</span>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-gray-500 text-xs">Location</p>
-                  <p className="font-medium text-gray-800">{selectedEmployee.locid}</p>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-gray-500 text-xs">Face Status</p>
-                  <span
-                    className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                      selectedEmployee.face_status === 0
-                        ? "bg-red-100 text-red-700"
-                        : selectedEmployee.face_status === 1
-                        ? "bg-orange-100 text-orange-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
-                  >
-                    {selectedEmployee.face_status === 0
-                      ? "Not Enabled"
-                      : selectedEmployee.face_status === 1
-                      ? "Pending"
-                      : "Registered"}
+                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Face Bio</span>
+                  <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${
+                    selectedEmployee.face_status === 2 ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"
+                  }`}>
+                    {selectedEmployee.face_status === 2 ? "Verified" : "Unset"}
                   </span>
                 </div>
               </div>
+
+              <button 
+                onClick={() => setSelectedEmployee(null)}
+                className="w-full mt-8 py-3 bg-gray-900 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:bg-gray-800 transition-colors"
+              >
+                Close Profile
+              </button>
             </div>
           </div>
         )}
-
       </main>
     </div>
   );
